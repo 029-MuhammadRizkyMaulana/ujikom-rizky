@@ -1,21 +1,16 @@
 /* eslint-disable @next/next/no-img-element */
-export default function ProductCard({ p, onBuy }) {
+export default function ProductCard({ p, onBuy, onImageClick }) {
   
-  // 1. LOGIKA UTAMA (Sistem Hybrid)
   const getProductImage = () => {
-    // A. JIKA DATA DARI DATABASE ADALAH URL (Skala Jutaan Produk)
-    // Ini jawaban untuk penguji: "Jika jutaan produk, data image dari database berupa link URL, Pak."
+ 
     if (p.image && p.image.startsWith('http')) {
       return p.image;
     }
 
-    // B. JIKA DATA ADALAH FILE LOKAL (Untuk Produk Unggulan di Folder Images)
     if (p.image && p.image.includes('.')) {
       return `/images/${p.image}`;
     }
 
-    // C. JIKA TIDAK ADA DATA IMAGE (Sistem Auto-Search API)
-    // Jawaban untuk penguji: "Jika admin lupa upload, sistem otomatis cari gambar yang relevan."
     const keyword = p.name ? p.name.split(' ')[0].toLowerCase() : "product";
     return `https://loremflickr.com/400/400/${keyword}?lock=${p.id}`;
   };
@@ -25,17 +20,16 @@ export default function ProductCard({ p, onBuy }) {
       <div className="relative aspect-square w-full bg-gray-50">
         <img
           src={getProductImage()} 
+          onClick={() => onImageClick(getProductImage())} // GANTI BAGIAN INI
           alt={p.name}
-          className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-500"
+          className="cursor-zoom-in object-cover w-full h-full group-hover:scale-110 transition-transform duration-500"
           onError={(e) => {
-            // D. FAILSAFE (Jika Link Mati atau File Dihapus)
-            const keyword = p.name.split(' ')[0].toLowerCase();
+            const keyword = p.name ? p.name.split(' ')[0].toLowerCase() : "product";
             e.target.src = `https://loremflickr.com/400/400/${keyword}?lock=${p.id}`;
           }}
         />
       </div>
       
-      {/* ... bagian p-4 dan button tetap sama ... */}
       <div className="p-4">
         <h3 className="font-bold text-gray-800 text-sm mb-1 line-clamp-1">{p.name}</h3>
         <p className="text-blue-600 font-black text-lg mb-4">

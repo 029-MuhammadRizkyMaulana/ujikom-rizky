@@ -1,9 +1,8 @@
-export default function Navbar({ searchQuery, setSearchQuery, cartCount, onLogoClick, onCartClick }) {
+export default function Navbar({ searchQuery, setSearchQuery, cartCount, onLogoClick, onCartClick, onHelpClick }) {
   return (
     <nav className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
         
-        {/* LOGO */}
         <div className="flex-shrink-0">
           <h1 
             className="text-2xl font-black bg-gradient-to-r from-blue-600 to-teal-500 bg-clip-text text-transparent cursor-pointer" 
@@ -13,7 +12,6 @@ export default function Navbar({ searchQuery, setSearchQuery, cartCount, onLogoC
           </h1>
         </div>
 
-        {/* SEARCH BAR */}
         <div className="flex flex-grow max-w-2xl">
           <div className="relative w-full">
             <input 
@@ -31,10 +29,8 @@ export default function Navbar({ searchQuery, setSearchQuery, cartCount, onLogoC
           </div>
         </div>
 
-        {/* RIGHT MENU (CART & PROFILE) */}
         <div className="flex items-center gap-4 text-gray-600">
            
-           {/* ICON KERANJANG - SEKARANG BISA DIKLIK */}
            <div 
              onClick={onCartClick} 
              className="relative cursor-pointer hover:text-blue-600 transition p-1"
@@ -49,10 +45,20 @@ export default function Navbar({ searchQuery, setSearchQuery, cartCount, onLogoC
              )}
            </div>
 
-           <div className="hidden sm:block text-sm font-medium hover:text-blue-600 cursor-pointer">Bantuan</div>
+            <button 
+              onClick={onHelpClick}
+              className="flex items-center gap-2 text-gray-600 hover:text-blue-600 font-bold transition-all text-sm"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+              Bantuan
+             </button>
            <div className="h-9 w-9 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold border-2 border-blue-100 shadow-sm">M</div>
+           
         </div>
-
       </div>
     </nav>
   );

@@ -14,11 +14,13 @@ export default function UserPage() {
   const [selectedCategory, setSelectedCategory] = useState("Semua");
   const categories = ["Semua", "Elektronik", "Pakaian", "Makanan", "Lainnya"];
   const [isLoading, setIsLoading] = useState(true);
+  const [zoomedImage, setZoomedImage] = useState(null);
   
   const [cartCount, setCartCount] = useState(0);
   const [cartItems, setCartItems] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isSnapOpen, setIsSnapOpen] = useState(false);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -35,7 +37,6 @@ export default function UserPage() {
     fetchProducts();
   }, []);
 
-  // Fungsi Hapus Barang
   const removeFromCart = (index) => {
     const newItems = [...cartItems];
     newItems.splice(index, 1);
@@ -86,6 +87,7 @@ export default function UserPage() {
         cartCount={cartCount} 
         onLogoClick={() => setSelectedCategory("Semua")}
         onCartClick={() => setIsCartOpen(true)}
+        onHelpClick={() => setIsHelpOpen(true)}
       />
 
       <main className="p-4 md:p-8 max-w-7xl mx-auto flex-grow w-full">
@@ -104,18 +106,66 @@ export default function UserPage() {
           setSelectedCategory={setSelectedCategory} 
         />
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
-          {isLoading ? (
-            Array.from({ length: 10 }).map((_, i) => <SkeletonCard key={i} />)
-          ) : (
-            filteredProducts.map(p => (
-              <ProductCard key={p.id} p={p} onBuy={handleCheckout} />
-            ))
-          )}
-        </div>
+        <div className="w-full">
+  {isLoading ? (
+    // Tampilan Loading (Skeleton)
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+      {Array.from({ length: 10 }).map((_, i) => <SkeletonCard key={i} />)}
+    </div>
+  ) : filteredProducts.length > 0 ? (
+    // Tampilan Jika Produk Ada
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+      {filteredProducts.map(p => (
+        <ProductCard key={p.id} p={p} onBuy={handleCheckout} onImageClick={(imgUrl) => setZoomedImage(imgUrl)}/>
+      ))}
+    </div>
+  ) : (
+    // Tampilan Jika Produk TIDAK Ditemukan
+    <div className="flex flex-col items-center justify-center py-20 bg-white rounded-3xl border-2 border-dashed border-gray-200">
+      <div className="bg-gray-50 p-6 rounded-full mb-4 text-gray-300">
+     <svg 
+      xmlns="http://www.w3.org/2000/svg" 
+      width="48" 
+      height="48" 
+      viewBox="0 0 24 24" 
+      fill="none" 
+      stroke="currentColor" 
+      strokeWidth="2" 
+      strokeLinecap="round" 
+      strokeLinejoin="round"
+    >
+      <circle cx="11" cy="11" r="8"></circle>
+      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+     </svg>
+    </div>
+      <h3 className="text-xl font-semibold text-gray-800">
+        Produk <span className="text-blue-600">{searchQuery}</span> tidak ditemukan
+      </h3>
+      <p className="text-gray-500 mt-2">Coba cari dengan kata kunci lain atau cek kategori berbeda.</p>
+     </div>
+    )}
+    </div>
       </main>
 
-      {/* DRAWER KERANJANG PREMIUM */}
+      {/* Footer Sederhana */}
+      <footer className="bg-white border-t border-gray-100 py-8 mt-auto">
+        <div className="max-w-7xl mx-auto px-4 md:px-8">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+              <p className="text-gray-500 text-sm font-medium">
+                © {new Date().getFullYear()} <span>Maul Shop</span>. All rights reserved.
+              </p>
+            </div>
+            
+            <div className="flex gap-6">
+              <span className="text-gray-400 text-xs font-bold uppercase tracking-widest cursor-pointer hover:text-blue-600 transition-colors">Privacy Policy</span>
+              <span className="text-gray-400 text-xs font-bold uppercase tracking-widest cursor-pointer hover:text-blue-600 transition-colors">About Us</span>
+              <span className="text-gray-400 text-xs font-bold uppercase tracking-widest cursor-pointer hover:text-blue-600 transition-colors">Terms of Service</span>
+            </div>
+          </div>
+        </div>
+      </footer>
+
       {isCartOpen && (
         <div className="fixed inset-0 z-[130] overflow-hidden">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" onClick={() => setIsCartOpen(false)}></div>
@@ -123,7 +173,7 @@ export default function UserPage() {
             
             <div className="p-6 border-b flex items-center justify-between bg-white sticky top-0 z-10">
         <div className="flex items-center gap-3">
-          {/* Icon Keranjang Garis (Linear) */}
+
           <div className="bg-blue-600 p-2 rounded-xl text-white shadow-lg shadow-blue-100">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="8" cy="21" r="1"></circle>
@@ -138,8 +188,7 @@ export default function UserPage() {
         </div>
         <button onClick={() => setIsCartOpen(false)} className="h-10 w-10 flex items-center justify-center hover:bg-gray-100 rounded-full transition-all text-gray-400">✕</button>
       </div>
-            
-            {/* List Barang */}
+
             <div className="flex-grow overflow-y-auto p-6 space-y-6">
               {cartItems.length === 0 ? (
                 <div className="text-center py-24 px-6 flex flex-col items-center">
@@ -165,13 +214,12 @@ export default function UserPage() {
                         <h4 className="text-sm font-bold text-gray-800 line-clamp-1">{item.name}</h4>
                         <p className="text-blue-600 font-black mt-1">Rp {Number(item.price).toLocaleString('id-ID')}</p>
                       </div>
-                      
-                     {/* Tombol Hapus dengan Icon Sampah yang lebih bagus */}
+
                      <button 
                        onClick={() => removeFromCart(index)}
                        className="flex items-center gap-1.5 text-red-400 hover:text-red-600 transition-colors group/delete"
                      >
-                     {/* Icon Sampah SVG */}
+
                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                        <path d="M3 6h18"></path>
                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
@@ -185,7 +233,6 @@ export default function UserPage() {
               )}
             </div>
 
-            {/* Footer / Total */}
             <div className="p-6 border-t bg-gray-50/50 space-y-4">
               <div className="flex justify-between items-end">
                 <span className="text-sm font-medium text-gray-500">Total Pembayaran:</span>
@@ -205,7 +252,6 @@ export default function UserPage() {
         </div>
       )}
 
-      {/* MODAL & MIDTRANS TETAP SAMA SEPERTI SEBELUMNYA */}
       {showModal && (
         <div className="fixed inset-0 z-[210] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
           <div className="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl animate-in zoom-in duration-200">
@@ -219,7 +265,6 @@ export default function UserPage() {
         </div>
       )}
 
-      {/* SIMULASI MIDTRANS */}
       {isSnapOpen && (
         <div className="fixed inset-0 z-[250] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden animate-in zoom-in duration-300">
@@ -241,6 +286,70 @@ export default function UserPage() {
           </div>
         </div>
       )}
+
+      {isHelpOpen && (
+  <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+    <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden animate-in zoom-in duration-300">
+      <div className="bg-blue-600 p-6 text-white flex justify-between items-center">
+        <h3 className="text-xl font-black">Pusat Bantuan</h3>
+        <button onClick={() => setIsHelpOpen(false)} className="hover:rotate-90 transition-transform">✕</button>
+      </div>
+      <div className="p-8 space-y-6">
+        <div className="flex gap-4">
+          <div className="bg-blue-50 p-3 rounded-2xl text-blue-600 h-fit">📦</div>
+          <div>
+            <h4 className="font-bold text-gray-800">Cara Belanja</h4>
+            <p className="text-sm text-gray-500">Pilih produk favoritmu, masukkan keranjang, dan lakukan pembayaran melalui sistem Midtrans kami.</p>
+          </div>
+        </div>
+        <div className="flex gap-4">
+          <div className="bg-orange-50 p-3 rounded-2xl text-orange-600 h-fit">🚚</div>
+          <div>
+            <h4 className="font-bold text-gray-800">Pengiriman</h4>
+            <p className="text-sm text-gray-500">Estimasi pengiriman adalah 1-3 hari kerja tergantung lokasi tujuan Anda.</p>
+          </div>
+        </div>
+        <div className="flex gap-4">
+          <div className="bg-green-50 p-3 rounded-2xl text-green-600 h-fit">📧</div>
+          <div>
+            <h4 className="font-bold text-gray-800">Kontak Kami</h4>
+            <p className="text-sm text-gray-500">Ada kendala? Hubungi tim support kami di <span className="font-bold">support@maulshop.com</span></p>
+          </div>
+        </div>
+        <button 
+          onClick={() => setIsHelpOpen(false)}
+          className="w-full bg-gray-100 py-3 rounded-xl font-bold text-gray-600 hover:bg-gray-200 transition-all"
+        >
+          Tutup
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+  {/* Modal Preview Gambar Utuh */}
+{zoomedImage && (
+  <div 
+    className="fixed inset-0 z-[500] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+    onClick={() => setZoomedImage(null)}
+  >
+    {/* Tombol Tutup */}
+    <button className="absolute top-5 right-5 text-white/70 hover:text-white transition-colors bg-white/10 p-2 rounded-full">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+
+    <div className="relative max-w-4xl w-full h-full flex items-center justify-center">
+      <img 
+        src={zoomedImage} 
+        alt="Preview Produk" 
+        className="max-w-full max-h-full object-contain rounded-lg animate-in zoom-in-95 duration-300 shadow-2xl"
+      />
+    </div>
+  </div>
+)}
     </div>
   );
 }
