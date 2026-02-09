@@ -1,5 +1,8 @@
 /* eslint-disable @next/next/no-img-element */
+import { useState } from 'react';
+
 export default function ProductCard({ p, onBuy, onImageClick }) {
+  const [showMore, setShowMore] = useState(false);
   
   const getProductImage = () => {
  
@@ -20,7 +23,7 @@ export default function ProductCard({ p, onBuy, onImageClick }) {
       <div className="relative aspect-square w-full bg-gray-50">
         <img
           src={getProductImage()} 
-          onClick={() => onImageClick(getProductImage())} // GANTI BAGIAN INI
+          onClick={() => onImageClick(getProductImage())}
           alt={p.name}
           className="cursor-zoom-in object-cover w-full h-full group-hover:scale-110 transition-transform duration-500"
           onError={(e) => {
@@ -31,10 +34,27 @@ export default function ProductCard({ p, onBuy, onImageClick }) {
       </div>
       
       <div className="p-4">
-        <h3 className="font-bold text-gray-800 text-sm mb-1 line-clamp-1">{p.name}</h3>
+        <h3 className="font-bold text-gray-800 text-sm mb-1">{p.name}</h3>
+
         <p className="text-blue-600 font-black text-lg mb-4">
           Rp {Number(p.price).toLocaleString('id-ID')}
         </p>
+
+       
+      <div className="mb-4">
+        <p className={`text-sm text-gray-600 leading-relaxed ${!showMore ? 'line-clamp-2' : ''}`}>
+          {p.description || ""}
+        </p>
+      
+        {p.description && p.description.length > 50 && (
+         <button 
+          onClick={() => setShowMore(!showMore)}
+          className="text-blue-500 text-xs font-bold mt-1 hover:underline"
+        >
+          {showMore ? "Sembunyikan" : "Selengkapnya..."}
+        </button>
+        )}
+      </div>
 
         <button 
           onClick={() => onBuy(p.id, p.name)}
